@@ -1,3 +1,4 @@
+
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -21,9 +22,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error(error);
-    return NextResponse.json(
-      { error: "Invalid request." },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
-
+}

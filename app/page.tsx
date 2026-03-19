@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const [input, setInput] = useState("");
@@ -9,13 +9,56 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
 
+  const [passwordInput, setPasswordInput] = useState("");
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+
   const quickPrompts = [
     { label: "Availability", text: "Hi, is it available?" },
-    { label: "Late checkout", text: "Hi Yonghao, yes i want to check out at 1 pm Thanks!" },
+    {
+      label: "Late checkout",
+      text: "Hi Yonghao, yes i want to check out at 1 pm Thanks!",
+    },
     { label: "Parking", text: "Is parking included?" },
-    { label: "Price negotiation", text: "Can you do $1800 instead of $2100?" },
+    {
+      label: "Price negotiation",
+      text: "Can you do $1800 instead of $2100?",
+    },
     { label: "Short stay", text: "Can I stay for 2 weeks?" },
   ];
+
+  useEffect(() => {
+    const unlocked = localStorage.getItem("airbnb_ai_unlocked");
+    if (unlocked === "true") {
+      setIsUnlocked(true);
+    }
+  }, []);
+
+  const unlockApp = async () => {
+    setPasswordError("");
+
+    try {
+      const res = await fetch("/api/unlock", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password: passwordInput }),
+      });
+
+      if (!res.ok) {
+        setPasswordError("Wrong password.");
+        return;
+      }
+
+      localStorage.setItem("airbnb_ai_unlocked", "true");
+      setIsUnlocked(true);
+      setPasswordInput("");
+    } catch (err) {
+      console.error(err);
+      setPasswordError("Unable to verify password.");
+    }
+  };
 
   const generateReply = async () => {
     if (!input.trim()) return;
@@ -60,6 +103,120 @@ export default function Home() {
     }
   };
 
+  const logout = () => {
+    localStorage.removeItem("airbnb_ai_unlocked");
+    setIsUnlocked(false);
+    setReply("");
+    setInput("");
+    setCopied(false);
+    setError("");
+  };
+
+  if (!isUnlocked) {
+    return (
+      <main
+        style={{
+          minHeight: "100vh",
+          backgroundColor: "#f7f7f8",
+          color: "#111827",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "24px",
+          fontFamily: "Arial, sans-serif",
+        }}
+      >
+        <div
+          style={{
+            width: "100%",
+            maxWidth: 420,
+            backgroundColor: "#ffffff",
+            border: "1px solid #e5e7eb",
+            borderRadius: 20,
+            padding: 28,
+            boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+          }}
+        >
+          <h1
+            style={{
+              fontSize: 30,
+              marginBottom: 10,
+              fontWeight: 700,
+            }}
+          >
+            Airbnb AI Assistant
+          </h1>
+
+          <p
+            style={{
+              color: "#4b5563",
+              fontSize: 16,
+              lineHeight: 1.6,
+              marginBottom: 20,
+            }}
+          >
+            Enter password to continue.
+          </p>
+
+          <input
+            type="password"
+            value={passwordInput}
+            onChange={(e) => {
+              setPasswordInput(e.target.value);
+              setPasswordError("");
+            }}
+            placeholder="Password"
+            style={{
+              width: "100%",
+              padding: "14px 16px",
+              borderRadius: 12,
+              border: "1px solid #d1d5db",
+              fontSize: 16,
+              boxSizing: "border-box",
+              marginBottom: 14,
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") unlockApp();
+            }}
+          />
+
+          <button
+            onClick={unlockApp}
+            style={{
+              width: "100%",
+              padding: "14px 18px",
+              borderRadius: 12,
+              border: "none",
+              backgroundColor: "#111827",
+              color: "#ffffff",
+              fontSize: 16,
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            Enter
+          </button>
+
+          {passwordError && (
+            <div
+              style={{
+                marginTop: 14,
+                padding: "12px 14px",
+                borderRadius: 12,
+                backgroundColor: "#fef2f2",
+                color: "#b91c1c",
+                border: "1px solid #fecaca",
+                fontSize: 15,
+              }}
+            >
+              {passwordError}
+            </div>
+          )}
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main
       style={{
@@ -70,22 +227,43 @@ export default function Home() {
         fontFamily: "Arial, sans-serif",
       }}
     >
-      <div
-        style={{
-          maxWidth: 900,
-          margin: "0 auto",
-        }}
-      >
-        <h1
+      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+        <div
           style={{
-            fontSize: "clamp(28px, 5vw, 42px)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 12,
+            flexWrap: "wrap",
             marginBottom: 12,
-            fontWeight: 700,
-            color: "#111827",
           }}
         >
-          Airbnb AI Assistant
-        </h1>
+          <h1
+            style={{
+              fontSize: "clamp(28px, 5vw, 42px)",
+              margin: 0,
+              fontWeight: 700,
+              color: "#111827",
+            }}
+          >
+            Airbnb AI Assistant
+          </h1>
+
+          <button
+            onClick={logout}
+            style={{
+              padding: "10px 14px",
+              borderRadius: 12,
+              border: "1px solid #d1d5db",
+              backgroundColor: "#ffffff",
+              color: "#111827",
+              cursor: "pointer",
+              fontWeight: 600,
+            }}
+          >
+            Lock
+          </button>
+        </div>
 
         <p
           style={{
@@ -110,13 +288,7 @@ export default function Home() {
             Quick Tests
           </h3>
 
-          <div
-            style={{
-              display: "flex",
-              gap: 10,
-              flexWrap: "wrap",
-            }}
-          >
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             {quickPrompts.map((item) => (
               <button
                 key={item.label}
@@ -260,4 +432,5 @@ export default function Home() {
       </div>
     </main>
   );
+}
 
