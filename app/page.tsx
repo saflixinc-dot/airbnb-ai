@@ -10,26 +10,11 @@ export default function Home() {
   const [error, setError] = useState("");
 
   const quickPrompts = [
-    {
-      label: "Availability",
-      text: "Hi, is it available?",
-    },
-    {
-      label: "Late checkout",
-      text: "Hi Yonghao, yes i want to check out at 1 pm Thanks!",
-    },
-    {
-      label: "Parking",
-      text: "Is parking included?",
-    },
-    {
-      label: "Price negotiation",
-      text: "Can you do $1800 instead of $2100?",
-    },
-    {
-      label: "Short stay",
-      text: "Can I stay for 2 weeks?",
-    },
+    { label: "Availability", text: "Hi, is it available?" },
+    { label: "Late checkout", text: "Hi Yonghao, yes i want to check out at 1 pm Thanks!" },
+    { label: "Parking", text: "Is parking included?" },
+    { label: "Price negotiation", text: "Can you do $1800 instead of $2100?" },
+    { label: "Short stay", text: "Can I stay for 2 weeks?" },
   ];
 
   const generateReply = async () => {
@@ -68,10 +53,7 @@ export default function Home() {
     try {
       await navigator.clipboard.writeText(reply);
       setCopied(true);
-
-      setTimeout(() => {
-        setCopied(false);
-      }, 1500);
+      setTimeout(() => setCopied(false), 1500);
     } catch (err) {
       console.error(err);
       setError("Failed to copy reply.");
@@ -79,127 +61,203 @@ export default function Home() {
   };
 
   return (
-    <main style={{ maxWidth: 900, margin: "0 auto", padding: "40px 20px" }}>
-      <h1 style={{ fontSize: "32px", marginBottom: "12px" }}>
-        Airbnb AI Assistant
-      </h1>
-
-      <p style={{ color: "#555", marginBottom: "24px" }}>
-        Paste a guest message below and generate a professional reply in your
-        hosting style.
-      </p>
-
-      <div style={{ marginBottom: "20px" }}>
-        <h3 style={{ marginBottom: "10px" }}>Quick Tests</h3>
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-          {quickPrompts.map((item) => (
-            <button
-              key={item.label}
-              onClick={() => {
-                setInput(item.text);
-                setCopied(false);
-                setError("");
-              }}
-              style={{
-                padding: "10px 14px",
-                borderRadius: "8px",
-                border: "1px solid #ccc",
-                background: "#f7f7f7",
-                cursor: "pointer",
-              }}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div style={{ marginBottom: "20px" }}>
-        <textarea
-          rows={8}
-          value={input}
-          onChange={(e) => {
-            setInput(e.target.value);
-            setCopied(false);
-            setError("");
-          }}
-          placeholder="Paste guest message here..."
+    <main
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "#f7f7f8",
+        color: "#111827",
+        padding: "24px 16px 40px",
+        fontFamily: "Arial, sans-serif",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 900,
+          margin: "0 auto",
+        }}
+      >
+        <h1
           style={{
-            width: "100%",
-            padding: "14px",
-            borderRadius: "10px",
-            border: "1px solid #ccc",
-            fontSize: "16px",
-            resize: "vertical",
-          }}
-        />
-      </div>
-
-      <div style={{ display: "flex", gap: "12px", marginBottom: "24px" }}>
-        <button
-          onClick={generateReply}
-          disabled={loading}
-          style={{
-            padding: "12px 18px",
-            borderRadius: "8px",
-            border: "none",
-            background: loading ? "#999" : "#111",
-            color: "#fff",
-            cursor: loading ? "not-allowed" : "pointer",
+            fontSize: "clamp(28px, 5vw, 42px)",
+            marginBottom: 12,
+            fontWeight: 700,
+            color: "#111827",
           }}
         >
-          {loading ? "Generating..." : "Generate Reply"}
-        </button>
+          Airbnb AI Assistant
+        </h1>
 
-        <button
-          onClick={copyReply}
-          disabled={!reply}
+        <p
           style={{
-            padding: "12px 18px",
-            borderRadius: "8px",
-            border: "1px solid #ccc",
-            background: !reply ? "#f3f3f3" : "#fff",
-            color: "#111",
-            cursor: !reply ? "not-allowed" : "pointer",
-          }}
-        >
-          {copied ? "Copied!" : "Copy Reply"}
-        </button>
-      </div>
-
-      {error && (
-        <div
-          style={{
-            marginBottom: "20px",
-            padding: "12px 14px",
-            borderRadius: "8px",
-            background: "#fff3f3",
-            color: "#b00020",
-            border: "1px solid #f1b5b5",
-          }}
-        >
-          {error}
-        </div>
-      )}
-
-      <div>
-        <h3 style={{ marginBottom: "10px" }}>Reply</h3>
-        <div
-          style={{
-            minHeight: "160px",
-            padding: "16px",
-            borderRadius: "10px",
-            border: "1px solid #ddd",
-            background: "#fafafa",
-            whiteSpace: "pre-wrap",
+            color: "#4b5563",
+            fontSize: "18px",
             lineHeight: 1.6,
+            marginBottom: 28,
           }}
         >
-          {reply || "Your generated reply will appear here."}
+          Paste a guest message below and generate a professional reply in your
+          hosting style.
+        </p>
+
+        <div style={{ marginBottom: 22 }}>
+          <h3
+            style={{
+              marginBottom: 12,
+              fontSize: 24,
+              color: "#111827",
+            }}
+          >
+            Quick Tests
+          </h3>
+
+          <div
+            style={{
+              display: "flex",
+              gap: 10,
+              flexWrap: "wrap",
+            }}
+          >
+            {quickPrompts.map((item) => (
+              <button
+                key={item.label}
+                onClick={() => {
+                  setInput(item.text);
+                  setCopied(false);
+                  setError("");
+                }}
+                style={{
+                  padding: "12px 16px",
+                  borderRadius: 12,
+                  border: "1px solid #d1d5db",
+                  backgroundColor: "#ffffff",
+                  color: "#111827",
+                  fontSize: 16,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                }}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 20 }}>
+          <textarea
+            rows={8}
+            value={input}
+            onChange={(e) => {
+              setInput(e.target.value);
+              setCopied(false);
+              setError("");
+            }}
+            placeholder="Paste guest message here..."
+            style={{
+              width: "100%",
+              padding: 16,
+              borderRadius: 16,
+              border: "1px solid #d1d5db",
+              backgroundColor: "#ffffff",
+              color: "#111827",
+              fontSize: 18,
+              lineHeight: 1.5,
+              resize: "vertical",
+              boxSizing: "border-box",
+            }}
+          />
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: 12,
+            flexWrap: "wrap",
+            marginBottom: 24,
+          }}
+        >
+          <button
+            onClick={generateReply}
+            disabled={loading}
+            style={{
+              padding: "14px 20px",
+              borderRadius: 12,
+              border: "none",
+              backgroundColor: loading ? "#9ca3af" : "#111827",
+              color: "#ffffff",
+              fontSize: 17,
+              fontWeight: 600,
+              cursor: loading ? "not-allowed" : "pointer",
+              minWidth: 180,
+            }}
+          >
+            {loading ? "Generating..." : "Generate Reply"}
+          </button>
+
+          <button
+            onClick={copyReply}
+            disabled={!reply}
+            style={{
+              padding: "14px 20px",
+              borderRadius: 12,
+              border: "1px solid #d1d5db",
+              backgroundColor: !reply ? "#e5e7eb" : "#ffffff",
+              color: "#111827",
+              fontSize: 17,
+              fontWeight: 600,
+              cursor: !reply ? "not-allowed" : "pointer",
+              minWidth: 160,
+            }}
+          >
+            {copied ? "Copied!" : "Copy Reply"}
+          </button>
+        </div>
+
+        {error && (
+          <div
+            style={{
+              marginBottom: 20,
+              padding: "12px 14px",
+              borderRadius: 12,
+              backgroundColor: "#fef2f2",
+              color: "#b91c1c",
+              border: "1px solid #fecaca",
+              fontSize: 16,
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        <div>
+          <h3
+            style={{
+              marginBottom: 12,
+              fontSize: 24,
+              color: "#111827",
+            }}
+          >
+            Reply
+          </h3>
+
+          <div
+            style={{
+              minHeight: 180,
+              padding: 18,
+              borderRadius: 16,
+              border: "1px solid #d1d5db",
+              backgroundColor: "#ffffff",
+              color: "#111827",
+              whiteSpace: "pre-wrap",
+              lineHeight: 1.7,
+              fontSize: 18,
+              boxSizing: "border-box",
+            }}
+          >
+            {reply || "Your generated reply will appear here."}
+          </div>
         </div>
       </div>
     </main>
   );
-}
-
 
