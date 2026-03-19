@@ -6,7 +6,7 @@ const client = new OpenAI({
 
 export async function POST(req: Request) {
   try {
-    const { message } = await req.json();
+    const { message, listingInfo } = await req.json();
 
     const completion = await client.chat.completions.create({
       model: "gpt-4o",
@@ -21,28 +21,25 @@ Your personality:
 - Professional but not robotic
 - Slightly warm and human
 
-Property details:
-- Location: North York, Toronto
-- Monthly price: around $2100
-- Minimum stay: 28 days
-- No parties
-- No smoking
-- Parking: not included unless specified
-- Check-in after 4pm
-- Standard check-out: 11am
-
-Rules:
+Instructions:
+- Use the listing information provided by the user as the source of truth
+- If the listing information is missing, still reply helpfully and naturally
+- Do not make up details that are not provided
 - Do not always say yes to special requests
 - Keep flexibility but protect house rules
 - Keep replies concise and natural
-- Late check-out depends on cleaning schedule or next booking
-
-Always sound like a real human host, not AI.
+- Always sound like a real human host, not AI
           `,
         },
         {
           role: "user",
-          content: message,
+          content: `
+Listing information:
+${listingInfo || "No listing information provided."}
+
+Guest message:
+${message}
+          `,
         },
       ],
     });
@@ -52,6 +49,7 @@ Always sound like a real human host, not AI.
     });
   } catch (error) {
     console.error(error);
-    return new Response("Error generating reply", { status: 500 });
+    return new Response("Error", { status: 500 });
   }
 }
+
