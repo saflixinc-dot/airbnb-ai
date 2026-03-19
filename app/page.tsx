@@ -1,65 +1,237 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState } from "react";
+
+export default function HomePage() {
+  const [listing, setListing] = useState("North York Basement");
+  const [tone, setTone] = useState("friendly");
+  const [guestMessage, setGuestMessage] = useState(`Hi Yonghao,
+Thanks for the information. I’ll be visiting from Orlando, Florida with my mom. We’re looking forward to the stay and appreciate the clarification about the camera. Please let me know if there’s anything else you need from us before check-in.
+
+Thanks!`);
+  const [reply, setReply] = useState(`Hi,
+
+Thanks for your message! Everything is all set for your stay. There’s nothing else needed from you at the moment.
+
+I’ll send the check-in instructions shortly before your arrival. Safe travels from Orlando, and I look forward to hosting you and your mom!
+
+Best,
+Yonghao`);
+  const [intent, setIntent] = useState("camera_confirmation");
+  const [riskLevel, setRiskLevel] = useState("low");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function generateReply() {
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: guestMessage,
+          listing,
+          tone,
+        }),
+      });
+
+if (!res.ok) {
+  const errorData = await res.json().catch(() => null);
+  console.error("API error response:", errorData);
+  throw new Error(errorData?.error || "Failed to generate reply.");
+}
+
+      const data = await res.json();
+
+      setReply(data.reply || "");
+      setIntent(data.intent || "general");
+      setRiskLevel(data.riskLevel || "low");
+    } catch (err) {
+      console.error(err);
+  setError(err instanceof Error ? err.message : "Something went wrong while generating the reply.");
+   
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function clearForm() {
+    setGuestMessage("");
+    setReply("");
+    setIntent("");
+    setRiskLevel("");
+    setError("");
+  }
+
+  async function copyReply() {
+    try {
+      await navigator.clipboard.writeText(reply);
+    } catch (err) {
+      console.error("Copy failed:", err);
+    }
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="min-h-screen bg-gray-50 px-6 py-10">
+      <div className="mx-auto max-w-4xl">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+            Airbnb AI Host Assistant
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="mt-2 text-sm text-gray-600">
+            Generate guest replies quickly for your Airbnb listing.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="grid gap-6 md:grid-cols-2">
+            <div>
+              <label
+                htmlFor="listing"
+                className="mb-2 block text-sm font-medium text-gray-700"
+              >
+                Listing
+              </label>
+              <select
+                id="listing"
+                value={listing}
+                onChange={(e) => setListing(e.target.value)}
+                className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-gray-500"
+              >
+                <option value="North York Basement">North York Basement</option>
+                <option value="Upstairs Rooms">Upstairs Rooms</option>
+              </select>
+            </div>
+
+            <div>
+              <label
+                htmlFor="tone"
+                className="mb-2 block text-sm font-medium text-gray-700"
+              >
+                Tone
+              </label>
+              <select
+                id="tone"
+                value={tone}
+                onChange={(e) => setTone(e.target.value)}
+                className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-gray-500"
+              >
+                <option value="friendly">Friendly</option>
+                <option value="professional">Professional</option>
+                <option value="firm">Firm</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <label
+              htmlFor="guestMessage"
+              className="mb-2 block text-sm font-medium text-gray-700"
+            >
+              Guest Message
+            </label>
+            <textarea
+              id="guestMessage"
+              rows={8}
+              value={guestMessage}
+              onChange={(e) => setGuestMessage(e.target.value)}
+              className="w-full rounded-2xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-gray-500"
+              placeholder="Paste the guest message here..."
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button
+              onClick={generateReply}
+              disabled={loading || !guestMessage.trim()}
+              className="rounded-xl bg-gray-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-400"
+            >
+              {loading ? "Generating..." : "Generate Reply"}
+            </button>
+
+            <button
+              onClick={clearForm}
+              className="rounded-xl border border-gray-300 bg-white px-5 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+            >
+              Clear
+            </button>
+          </div>
+
+          {error && (
+            <p className="mt-4 text-sm text-red-600">
+              {error}
+            </p>
+          )}
         </div>
-      </main>
-    </div>
+
+        <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="grid gap-6 md:grid-cols-2">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Detected Intent
+              </p>
+              <p className="mt-2 text-sm text-gray-900">
+                {intent || "-"}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Risk Level
+              </p>
+              <p className="mt-2 text-sm text-gray-900">
+                {riskLevel || "-"}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <label
+              htmlFor="suggestedReply"
+              className="mb-2 block text-sm font-medium text-gray-700"
+            >
+              Suggested Reply
+            </label>
+            <textarea
+              id="suggestedReply"
+              rows={10}
+              value={reply}
+              onChange={(e) => setReply(e.target.value)}
+              className="w-full rounded-2xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-gray-500"
+              placeholder="AI-generated reply will appear here..."
+            />
+          </div>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button
+              onClick={copyReply}
+              disabled={!reply.trim()}
+              className="rounded-xl bg-gray-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-400"
+            >
+              Copy
+            </button>
+
+            <button
+              onClick={generateReply}
+              disabled={loading || !guestMessage.trim()}
+              className="rounded-xl border border-gray-300 bg-white px-5 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:bg-gray-100"
+            >
+              Regenerate
+            </button>
+
+            <button
+              className="rounded-xl border border-gray-300 bg-white px-5 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+            >
+              Save as Template
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }
+
